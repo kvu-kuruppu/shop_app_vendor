@@ -43,6 +43,8 @@ dependencies:
   csc_picker: ^0.2.6
   firebase_storage: ^10.3.11
   flutter_easyloading: ^3.0.5
+  email_validator: ^2.1.17
+  cached_network_image: ^3.2.1
 
 dev_dependencies:
   flutter_test:

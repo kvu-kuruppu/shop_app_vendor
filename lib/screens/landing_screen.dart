@@ -1,39 +1,104 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shop_app_vendor/constants/routes.dart';
+import 'package:shop_app_vendor/screens/business_register_screen.dart';
+import 'package:shop_app_vendor/screens/home_screen.dart';
+import 'package:shop_app_vendor/services/firebase_services.dart';
 
 class LandingScreen extends StatelessWidget {
   const LandingScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton.icon(
-                  onPressed: () {
-                    FirebaseAuth.instance.signOut().then((value) {
-                      Navigator.of(context).pushNamedAndRemoveUntil(
-                          loginScreenRoute, (route) => false);
-                    });
-                  },
-                  label: const Text('Log Out'),
-                  icon: const Icon(Icons.logout),
+    final FirebaseService _service = FirebaseService();
+
+    return StreamBuilder<DocumentSnapshot>(
+      stream: _service.vendor.doc(_service.user!.uid).snapshots(),
+      builder:
+          (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+        if (snapshot.hasError) {
+          return const Text('Something went wrong');
+        }
+
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator(
+            color: Colors.red,
+          );
+        }
+
+        if (!snapshot.data!.exists) {
+          return const BusinessRegisterScreen();
+        }
+
+        // VendorModel vendor =
+        //     VendorModel.fromJson(snapshot.data!.data() as Map<String, dynamic>);
+        
+        var docc = snapshot.data;
+
+        if(docc!['approved']) {
+          return Home();
+        }
+
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  // Log Out button
+                  TextButton.icon(
+                    onPressed: () {
+                      FirebaseAuth.instance.signOut().then((value) {
+                        Navigator.of(context).pushNamedAndRemoveUntil(
+                            loginScreenRoute, (route) => false);
+                      });
+                    },
+                    label: const Text('Log Out'),
+                    icon: const Icon(Icons.logout),
+                  ),
+                ],
+              ),
+              // Logo and Business Name
+              SizedBox(
+                height: 200,
+                width: 200,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: CachedNetworkImage(
+                    imageUrl: docc['logo'],
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => Container(
+                      height: 200,
+                      width: 200,
+                      color: Colors.grey.shade300,
+                    ),
+                  ),
                 ),
-              ],
-            ),
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.5,
-              child: const Center(child: Text('An Admin will contact you...')),
-            ),
-          ],
-        ),
-      ),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              // Business Name
+              Text(
+                docc['businessName'],
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              const Center(
+                  child: Text('An Admin will contact you...')),
+            ],
+          ),
+        );
+      },
     );
   }
 }

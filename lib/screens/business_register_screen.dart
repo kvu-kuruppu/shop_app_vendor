@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:async';
 
 import 'package:csc_picker/csc_picker.dart';
+import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -9,14 +10,14 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shop_app_vendor/constants/routes.dart';
 import 'package:shop_app_vendor/services/firebase_services.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+class BusinessRegisterScreen extends StatefulWidget {
+  const BusinessRegisterScreen({Key? key}) : super(key: key);
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<BusinessRegisterScreen> createState() => _BusinessRegisterScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _BusinessRegisterScreenState extends State<BusinessRegisterScreen> {
   final FirebaseService _services = FirebaseService();
   final _formkey = GlobalKey<FormState>();
   final _businessNameInput = TextEditingController();
@@ -250,6 +251,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         if (value!.isEmpty) {
                           return 'Email is required';
                         }
+                        if (!EmailValidator.validate(value)) {
+                          return 'Enter Valid Email';
+                        }
                       },
                     ),
                     const SizedBox(
@@ -402,7 +406,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               'cityValue': cityValue,
                               'uid': _services.user!.uid,
                               'time': DateTime.now(),
-                              'approved': true,
+                              'approved': false,
                             },
                           ).then((value) {
                             EasyLoading.dismiss();
