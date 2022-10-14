@@ -1,2 +1,2 @@
 const loginScreenRoute = '/login';
-const registerScreenRoute = '/register';
+const landingScreenRoute = '/landing';

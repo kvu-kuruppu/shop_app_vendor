@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterfire_ui/auth.dart';
-import 'package:shop_app_vendor/screens/home.dart';
+import 'package:shop_app_vendor/screens/landing_screen.dart';
 
 class LoginView extends StatelessWidget {
   const LoginView({Key? key}) : super(key: key);
@@ -55,7 +55,7 @@ class LoginView extends StatelessWidget {
         }
 
         // Render your application if authenticated
-        return const HomeScreen();
+        return const LandingScreen();
       },
     );
   }

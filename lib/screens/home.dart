@@ -4,7 +4,10 @@ import 'dart:async';
 import 'package:csc_picker/csc_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shop_app_vendor/constants/routes.dart';
+import 'package:shop_app_vendor/services/firebase_services.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -14,6 +17,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final FirebaseService _services = FirebaseService();
   final _formkey = GlobalKey<FormState>();
   final _businessNameInput = TextEditingController();
   final _contactNoInput = TextEditingController();
@@ -29,6 +33,8 @@ class _HomeScreenState extends State<HomeScreen> {
   String? countryValue;
   String? stateValue;
   String? cityValue;
+  String? _shopImgURL;
+  String? _logoURL;
 
   Widget _formField({
     TextEditingController? controller,
@@ -300,7 +306,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     // PIN Code Input
                     _formField(
                       controller: _pinCodeInput,
-                      label: 'PIN No',
+                      label: 'PIN Code',
                       type: TextInputType.number,
                       validator: (value) {
                         if (value!.isEmpty) {
@@ -353,6 +359,59 @@ class _HomeScreenState extends State<HomeScreen> {
                             msg: 'Country, State and City are not selected');
                         return;
                       }
+                      EasyLoading.show(status: 'Please Wait');
+                      _services
+                          .uploadImg(
+                              file: _shopImg,
+                              reference:
+                                  'vendors/${_services.user!.uid}/shop_image')
+                          .then((url) {
+                        if (url.isNotEmpty) {
+                          setState(() {
+                            _shopImgURL = url;
+                          });
+                        }
+                      }).then((value) {
+                        _services
+                            .uploadImg(
+                                file: _logo,
+                                reference:
+                                    'vendors/${_services.user!.uid}/logo')
+                            .then((url) {
+                          if (url.isNotEmpty) {
+                            setState(() {
+                              _logoURL = url;
+                            });
+                          }
+                        }).then((value) {
+                          _services.addVendor(
+                            data: {
+                              'shopImage': _shopImgURL,
+                              'logo': _logoURL,
+                              'businessName': _businessNameInput.text,
+                              'contactNo': _contactNoInput.text,
+                              'email': _emailInput.text,
+                              'taxStatus': _taxStatus,
+                              'gstNo': _gstNoInput.text.isEmpty
+                                  ? null
+                                  : _gstNoInput.text,
+                              'pinCode': _pinCodeInput.text,
+                              'landmark': _landmarkInput.text,
+                              'countryValue': countryValue,
+                              'stateValue': stateValue,
+                              'cityValue': cityValue,
+                              'uid': _services.user!.uid,
+                              'time': DateTime.now(),
+                              'approved': true,
+                            },
+                          ).then((value) {
+                            EasyLoading.dismiss();
+                            return Navigator.of(context)
+                                .pushNamedAndRemoveUntil(
+                                    landingScreenRoute, (route) => false);
+                          });
+                        });
+                      });
                     }
                   },
                   child: const Text('Register'),
