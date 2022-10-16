@@ -38,7 +38,7 @@ class LandingScreen extends StatelessWidget {
         var docc = snapshot.data;
 
         if(docc!['approved']) {
-          return Home();
+          return const Home();
         }
 
         return Padding(
