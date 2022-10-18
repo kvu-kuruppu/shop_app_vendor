@@ -4,6 +4,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:provider/provider.dart';
 import 'package:shop_app_vendor/constants/routes.dart';
 import 'package:shop_app_vendor/firebase_options.dart';
+import 'package:shop_app_vendor/provider/product_provider.dart';
 import 'package:shop_app_vendor/provider/vendor_provider.dart';
 import 'package:shop_app_vendor/screens/add_products_screen.dart';
 import 'package:shop_app_vendor/screens/home_screen.dart';
@@ -25,6 +26,7 @@ void main() async {
     MultiProvider(
       providers: [
         Provider<VendorProvider>(create: (_) => VendorProvider()),
+        Provider<ProductProvider>(create: (_) => ProductProvider()),
       ],
       child: MaterialApp(
         home: const SplashScreen(),

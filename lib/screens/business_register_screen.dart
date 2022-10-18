@@ -259,6 +259,7 @@ class _BusinessRegisterScreenState extends State<BusinessRegisterScreen> {
                     const SizedBox(
                       height: 10,
                     ),
+                    // Tax Registered Status
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [

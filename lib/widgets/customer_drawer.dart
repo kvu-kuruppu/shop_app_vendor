@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shop_app_vendor/constants/routes.dart';
@@ -68,6 +69,7 @@ class CustomDrawer extends StatelessWidget {
                 ExpansionTile(
                   title: const Text('Products'),
                   leading: const Icon(Icons.production_quantity_limits),
+                  childrenPadding: const EdgeInsets.only(left: 30),
                   children: [
                     // All Products
                     _drawerItems(
@@ -84,13 +86,17 @@ class CustomDrawer extends StatelessWidget {
               ],
             ),
           ),
-          const Divider(color: Colors.grey, thickness: 2.0,),
+          const Divider(
+            color: Colors.grey,
+            thickness: 2.0,
+          ),
           ListTile(
             title: const Text('Sign Out'),
             trailing: const Icon(Icons.logout),
             onTap: () {
-              Navigator.of(context)
-                  .pushNamedAndRemoveUntil(loginScreenRoute, (route) => false);
+              FirebaseAuth.instance.signOut();
+              // Navigator.of(context)
+              //     .pushNamedAndRemoveUntil(loginScreenRoute, (route) => false);
             },
           ),
         ],
@@ -98,3 +104,4 @@ class CustomDrawer extends StatelessWidget {
     );
   }
 }
+

@@ -10,6 +10,12 @@ class FirebaseService {
 
   final CollectionReference vendor =
       FirebaseFirestore.instance.collection('vendor');
+  final CollectionReference categories =
+      FirebaseFirestore.instance.collection('categories');
+  final CollectionReference mainCategory =
+      FirebaseFirestore.instance.collection('mainCategory');
+  final CollectionReference subCategory =
+      FirebaseFirestore.instance.collection('subCategory');
 
   firebase_storage.FirebaseStorage storage =
       firebase_storage.FirebaseStorage.instance;
