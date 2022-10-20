@@ -46,6 +46,7 @@ dependencies:
   email_validator: ^2.1.17
   cached_network_image: ^3.2.1
   provider:
+  intl:
 
 dev_dependencies:
   flutter_test:

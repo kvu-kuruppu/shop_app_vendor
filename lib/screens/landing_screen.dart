@@ -23,8 +23,12 @@ class LandingScreen extends StatelessWidget {
         }
 
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator(
-            color: Colors.red,
+          return const SizedBox(
+            height: 50,
+            width: 50,
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
           );
         }
 
@@ -34,10 +38,10 @@ class LandingScreen extends StatelessWidget {
 
         // VendorModel vendor =
         //     VendorModel.fromJson(snapshot.data!.data() as Map<String, dynamic>);
-        
+
         var docc = snapshot.data;
 
-        if(docc!['approved']) {
+        if (docc!['approved']) {
           return const Home();
         }
 
@@ -93,8 +97,7 @@ class LandingScreen extends StatelessWidget {
               const SizedBox(
                 height: 10,
               ),
-              const Center(
-                  child: Text('An Admin will contact you...')),
+              const Center(child: Text('An Admin will contact you...')),
             ],
           ),
         );

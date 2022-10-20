@@ -35,7 +35,13 @@ class CustomDrawer extends StatelessWidget {
               children: [
                 DrawerHeader(
                   child: _vendorData.doc == null
-                      ? const CircularProgressIndicator()
+                      ? const SizedBox(
+                          height: 50,
+                          width: 50,
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
                       : Row(
                           children: [
                             CachedNetworkImage(
@@ -104,4 +110,3 @@ class CustomDrawer extends StatelessWidget {
     );
   }
 }
-
