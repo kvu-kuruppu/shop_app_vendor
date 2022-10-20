@@ -9,6 +9,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shop_app_vendor/constants/routes.dart';
 import 'package:shop_app_vendor/services/firebase_services.dart';
+import 'package:shop_app_vendor/widgets/scaffold_msg.dart';
 
 class BusinessRegisterScreen extends StatefulWidget {
   const BusinessRegisterScreen({Key? key}) : super(key: key);
@@ -19,6 +20,7 @@ class BusinessRegisterScreen extends StatefulWidget {
 
 class _BusinessRegisterScreenState extends State<BusinessRegisterScreen> {
   final FirebaseService _services = FirebaseService();
+  final SCF _scf = SCF();
   final _formkey = GlobalKey<FormState>();
   final _businessNameInput = TextEditingController();
   final _contactNoInput = TextEditingController();
@@ -63,20 +65,6 @@ class _BusinessRegisterScreenState extends State<BusinessRegisterScreen> {
   Future<XFile?> pickImage() async {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
     return image;
-  }
-
-  _scaffold({msg}) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(msg),
-      backgroundColor: Colors.red,
-      action: SnackBarAction(
-        label: 'OK',
-        textColor: Colors.white,
-        onPressed: () {
-          ScaffoldMessenger.of(context).clearSnackBars();
-        },
-      ),
-    ));
   }
 
   @override
@@ -349,19 +337,27 @@ class _BusinessRegisterScreenState extends State<BusinessRegisterScreen> {
                 child: ElevatedButton(
                   onPressed: () {
                     if (_shopImg == null) {
-                      _scaffold(msg: 'Shop Image not selected');
+                      _scf.scaffoldMsg(
+                        context: context,
+                        msg: 'Shop Image not selected',
+                      );
                       return;
                     }
                     if (_logo == null) {
-                      _scaffold(msg: 'Logo not selected');
+                      _scf.scaffoldMsg(
+                        context: context,
+                        msg: 'Logo not selected',
+                      );
                       return;
                     }
                     if (_formkey.currentState!.validate()) {
                       if (countryValue == null ||
                           stateValue == null ||
                           cityValue == null) {
-                        _scaffold(
-                            msg: 'Country, State and City are not selected');
+                        _scf.scaffoldMsg(
+                          context: context,
+                          msg: 'Country, State and City are not selected',
+                        );
                         return;
                       }
                       EasyLoading.show(status: 'Please Wait');

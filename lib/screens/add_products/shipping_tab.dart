@@ -20,7 +20,7 @@ class _ShippingTabState extends State<ShippingTab>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    
+
     return Consumer<ProductProvider>(
       builder: (context, provider, _) {
         return ListView(
@@ -44,7 +44,9 @@ class _ShippingTabState extends State<ShippingTab>
                 label: 'Shipping Charges',
                 inputType: TextInputType.number,
                 onChanged: (value) {
-                  provider.getFormData(shippingCharge: int.parse(value));
+                  if (value.isNotEmpty) {
+                    provider.getFormData(shippingCharge: int.parse(value));
+                  }
                 },
               ),
           ],

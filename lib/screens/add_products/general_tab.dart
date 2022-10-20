@@ -5,6 +5,7 @@ import 'package:shop_app_vendor/provider/product_provider.dart';
 import 'package:shop_app_vendor/services/firebase_services.dart';
 import 'package:intl/intl.dart';
 import 'package:shop_app_vendor/widgets/add_products/form_field_input.dart';
+import 'package:shop_app_vendor/widgets/scaffold_msg.dart';
 
 class GeneralTab extends StatefulWidget {
   const GeneralTab({Key? key}) : super(key: key);
@@ -19,6 +20,7 @@ class _GeneralTabState extends State<GeneralTab>
   bool get wantKeepAlive => true;
 
   final FirebaseService _service = FirebaseService();
+  final SCF _scf = SCF();
   List<String> categoriesList = [];
   String? _selectedCategory;
   String? _taxStatus;
@@ -233,21 +235,32 @@ class _GeneralTabState extends State<GeneralTab>
               suffixIcon: Icons.monetization_on,
               inputType: TextInputType.number,
               onChanged: (value) {
-                provider.getFormData(regularPrice: int.parse(value));
+                if (value.isNotEmpty) {
+                  provider.getFormData(regularPrice: int.parse(value));
+                }
               },
             ),
             // Sales Price
             FormFieldInput(
-              label: 'Sales Price',
-              suffixIcon: Icons.monetization_on,
-              inputType: TextInputType.number,
-              onChanged: (value) {
-                setState(() {
-                  provider.getFormData(salesPrice: int.parse(value));
-                  _salesPrice = true;
-                });
-              },
-            ),
+                label: 'Sales Price',
+                suffixIcon: Icons.monetization_on,
+                inputType: TextInputType.number,
+                onChanged: (value) {
+                  if (value.isNotEmpty) {
+                    if (int.parse(value) >
+                        provider.productData!['regularPrice']) {
+                      _scf.scaffoldMsg(
+                        context: context,
+                        msg: 'Sales price should be less than Regular price',
+                      );
+                      return;
+                    }
+                    setState(() {
+                      provider.getFormData(salesPrice: int.parse(value));
+                      _salesPrice = true;
+                    });
+                  }
+                }),
             const SizedBox(height: 10),
             // Schedule
             if (_salesPrice)

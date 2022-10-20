@@ -19,11 +19,45 @@ class _AttributeTabState extends State<AttributeTab>
   final _sizeInput = TextEditingController();
   bool saved = false;
   bool entered = false;
+  String? _selectedUnit;
+  final List<String> _unitList = [
+    'kg',
+    'g',
+    'l',
+    'ml',
+    'nos',
+    'ft',
+    'yd',
+  ];
+
+  Widget _unitDrop(ProductProvider provider) {
+    return DropdownButtonFormField<String>(
+      value: _selectedUnit,
+      hint: const Text('Select Unit'),
+      items: _unitList.map<DropdownMenuItem<String>>((String value) {
+        return DropdownMenuItem(
+          value: value,
+          child: Text(value),
+        );
+      }).toList(),
+      onChanged: (String? value) {
+        setState(() {
+          _selectedUnit = value;
+          provider.getFormData(unit: value);
+        });
+      },
+      validator: (value) {
+        if (value == null) {
+          return 'Select Unit is required';
+        }
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    
+
     return Consumer<ProductProvider>(
       builder: (context, provider, _) {
         return ListView(
@@ -37,6 +71,8 @@ class _AttributeTabState extends State<AttributeTab>
               },
               maxLines: 1,
             ),
+            // Unit Drop
+            _unitDrop(provider),
             Row(
               children: [
                 // Size

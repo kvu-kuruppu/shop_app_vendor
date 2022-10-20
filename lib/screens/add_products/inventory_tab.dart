@@ -20,7 +20,7 @@ class _InventoryTabState extends State<InventoryTab>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    
+
     return Consumer<ProductProvider>(
       builder: (context, provider, _) {
         return ListView(
@@ -54,7 +54,9 @@ class _InventoryTabState extends State<InventoryTab>
                     label: 'Stock on hand',
                     inputType: TextInputType.number,
                     onChanged: (value) {
-                      provider.getFormData(stockOnHand: int.parse(value));
+                      if (value.isNotEmpty) {
+                        provider.getFormData(stockOnHand: int.parse(value));
+                      }
                     },
                   ),
                   // Reorder Level
@@ -62,7 +64,9 @@ class _InventoryTabState extends State<InventoryTab>
                     label: 'Reorder Level',
                     inputType: TextInputType.number,
                     onChanged: (value) {
-                      provider.getFormData(reorderLevel: int.parse(value));
+                      if (value.isNotEmpty) {
+                        provider.getFormData(reorderLevel: int.parse(value));
+                      }
                     },
                   ),
                 ],
