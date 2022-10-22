@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shop_app_vendor/screens/all_products/published.dart';
+import 'package:shop_app_vendor/screens/all_products/unpublished.dart';
 import 'package:shop_app_vendor/widgets/customer_drawer.dart';
 
 class ProductScreen extends StatelessWidget {
@@ -6,15 +8,33 @@ class ProductScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Products'),
-        elevation: 0,
-        backgroundColor: const Color.fromARGB(255, 10, 11, 102),
-      ),
-      drawer: const CustomDrawer(),
-      body: Center(
-        child: Text('ProductScreen'),
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Products'),
+          elevation: 0,
+          backgroundColor: const Color.fromARGB(255, 10, 11, 102),
+          bottom: const TabBar(
+            indicator: UnderlineTabIndicator(
+              borderSide: BorderSide(
+                width: 4,
+                color: Colors.deepOrange,
+              ),
+            ),
+            tabs: [
+              Tab(child: Text('Unpublished')),
+              Tab(child: Text('Published')),
+            ],
+          ),
+        ),
+        drawer: const CustomDrawer(),
+        body: const TabBarView(
+          children: [
+            Unpublished(),
+            Published(),
+          ],
+        ),
       ),
     );
   }

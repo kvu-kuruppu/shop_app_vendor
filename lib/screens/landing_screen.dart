@@ -12,10 +12,10 @@ class LandingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final FirebaseService _service = FirebaseService();
+    final FirebaseService service = FirebaseService();
 
     return StreamBuilder<DocumentSnapshot>(
-      stream: _service.vendor.doc(_service.user!.uid).snapshots(),
+      stream: service.vendor.doc(service.user!.uid).snapshots(),
       builder:
           (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
         if (snapshot.hasError) {

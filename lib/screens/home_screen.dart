@@ -8,10 +8,10 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _vendorData = Provider.of<VendorProvider>(context);
+    final vendorData = Provider.of<VendorProvider>(context);
 
-    if (_vendorData.doc == null) {
-      _vendorData.getVendorData();
+    if (vendorData.doc == null) {
+      vendorData.getVendorData();
     }
 
     return Scaffold(
@@ -21,7 +21,7 @@ class Home extends StatelessWidget {
         backgroundColor: const Color.fromARGB(255, 10, 11, 102),
       ),
       drawer: const CustomDrawer(),
-      body: Center(
+      body: const Center(
         child: Text('Home'),
       ),
     );

@@ -47,6 +47,7 @@ dependencies:
   cached_network_image: ^3.2.1
   provider:
   intl:
+  flutter_slidable:
 
 dev_dependencies:
   flutter_test:

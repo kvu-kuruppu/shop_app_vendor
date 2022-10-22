@@ -10,7 +10,7 @@ class CustomDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _vendorData = Provider.of<VendorProvider>(context);
+    final vendorData = Provider.of<VendorProvider>(context);
 
     Widget _drawerItems({String? text, IconData? icon, String? route}) {
       return ListTile(
@@ -34,7 +34,7 @@ class CustomDrawer extends StatelessWidget {
               mainAxisSize: MainAxisSize.max,
               children: [
                 DrawerHeader(
-                  child: _vendorData.doc == null
+                  child: vendorData.doc == null
                       ? const SizedBox(
                           height: 50,
                           width: 50,
@@ -45,11 +45,11 @@ class CustomDrawer extends StatelessWidget {
                       : Row(
                           children: [
                             CachedNetworkImage(
-                              imageUrl: _vendorData.doc!['logo'],
+                              imageUrl: vendorData.doc!['logo'],
                             ),
                             const SizedBox(width: 20),
                             Text(
-                              _vendorData.doc!['businessName'],
+                              vendorData.doc!['businessName'],
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 20,

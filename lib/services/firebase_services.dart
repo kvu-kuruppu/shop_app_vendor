@@ -29,12 +29,12 @@ class FirebaseService {
       firebase_storage.FirebaseStorage.instance;
 
   Future<String> uploadImg({XFile? file, String? reference}) async {
-    File _file = File(file!.path);
+    File filee = File(file!.path);
 
     firebase_storage.Reference ref =
         firebase_storage.FirebaseStorage.instance.ref(reference);
 
-    await ref.putFile(_file);
+    await ref.putFile(filee);
 
     String downloadURL = await ref.getDownloadURL();
 

@@ -22,14 +22,14 @@ class AddProductScreen extends StatefulWidget {
 class _AddProductScreenState extends State<AddProductScreen> {
   @override
   Widget build(BuildContext context) {
-    final FirebaseService _service = FirebaseService();
-    final _provider = Provider.of<ProductProvider>(context);
-    final _vendorData = Provider.of<VendorProvider>(context);
-    final _formkey = GlobalKey<FormState>();
-    final SCF _scf = SCF();
+    final FirebaseService service = FirebaseService();
+    final provider = Provider.of<ProductProvider>(context);
+    final vendorData = Provider.of<VendorProvider>(context);
+    final formkey = GlobalKey<FormState>();
+    final SCF scf = SCF();
 
     return Form(
-      key: _formkey,
+      key: formkey,
       child: DefaultTabController(
         length: 6,
         initialIndex: 0,
@@ -75,38 +75,38 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        if (_provider.imageFiles!.isEmpty) {
-                          _scf.scaffoldMsg(
+                        if (provider.imageFiles!.isEmpty) {
+                          scf.scaffoldMsg(
                             context: context,
                             msg: 'Image is not selected',
                           );
                           return;
                         }
-                        if (_formkey.currentState!.validate()) {
+                        if (formkey.currentState!.validate()) {
                           // print(_provider.productData);
                           EasyLoading.show(status: 'Please Wait...');
-                          _provider.getFormData(seller: {
-                            'name': _vendorData.doc!['businessName'],
-                            'uid': _service.user!.uid,
+                          provider.getFormData(seller: {
+                            'name': vendorData.doc!['businessName'],
+                            'uid': service.user!.uid,
                           });
-                          _service
+                          service
                               .uploadFiles(
-                            images: _provider.imageFiles,
+                            images: provider.imageFiles,
                             ref:
-                                'products/${_vendorData.doc!['businessName']}/${_provider.productData!['productName']}/',
-                            provider: _provider,
+                                'products/${vendorData.doc!['businessName']}/${provider.productData!['productName']}/',
+                            provider: provider,
                           )
                               .then((value) {
                             if (value.isNotEmpty) {
-                              _service
+                              service
                                   .saveToDb(
-                                data: _provider.productData,
+                                data: provider.productData,
                                 context: context,
                               )
                                   .then((value) {
                                 EasyLoading.dismiss();
                                 setState(() {
-                                  _provider.clearProductData();
+                                  provider.clearProductData();
                                 });
                               });
                             }
