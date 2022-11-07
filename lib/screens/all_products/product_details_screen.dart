@@ -1,8 +1,8 @@
-import 'dart:async';
-
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:intl/intl.dart';
 
 class ProductDetail extends StatefulWidget {
   final String id;
@@ -30,9 +30,14 @@ class _ProductDetailState extends State<ProductDetail> {
   var stockOnHandInput = TextEditingController();
   var reorderLevelInput = TextEditingController();
   var shippingChargeInput = TextEditingController();
+  var remarksInput = TextEditingController();
   String? taxStatus;
   String? taxPercentage;
   bool? editable = true;
+  DateTime? scheduleDate;
+  bool? manageInventory = false;
+  bool? shippingChargeStatus = false;
+  List sizeList = [];
 
   Widget _taxStatusDrop() {
     return DropdownButtonFormField<String>(
@@ -55,6 +60,7 @@ class _ProductDetailState extends State<ProductDetail> {
         if (value == null) {
           return 'Tax Status is required';
         }
+        return null;
       },
     );
   }
@@ -80,6 +86,7 @@ class _ProductDetailState extends State<ProductDetail> {
         if (value == null) {
           return 'Tax Percentage is required';
         }
+        return null;
       },
     );
   }
@@ -87,18 +94,44 @@ class _ProductDetailState extends State<ProductDetail> {
   @override
   void initState() {
     setState(() {
-      brandInput.text = widget.dataa['brand'] ?? 'Brand';
+      // General
       productNameInput.text = widget.dataa['productName'];
+      descriptionInput.text = widget.dataa['description'];
       regularPriceInput.text = widget.dataa['regularPrice'].toString();
       salesPriceInput.text = widget.dataa['salesPrice'].toString();
+      if (widget.dataa['scheduleDate'] != null) {
+        scheduleDate = (widget.dataa['scheduleDate'] as Timestamp).toDate();
+      }
       taxStatus = widget.dataa['taxStatus'];
       taxPercentage =
           widget.dataa['taxPercentage'] == 10 ? 'GST-10%' : 'GST-12%';
-      descriptionInput.text = widget.dataa['description'];
+
+      // Inventory
       skuInput.text = widget.dataa['sku'] ?? 'SKU';
-      stockOnHandInput.text = widget.dataa['stockOnHand'].toString();
-      reorderLevelInput.text = widget.dataa['reorderLevel'].toString();
-      shippingChargeInput.text = widget.dataa['shippingCharge'].toString();
+      if (widget.dataa['manageInventory'] == true) {
+        manageInventory = widget.dataa['manageInventory'];
+      }
+      if (widget.dataa['stockOnHand'] != null) {
+        stockOnHandInput.text = widget.dataa['stockOnHand'].toString();
+      }
+      if (widget.dataa['reorderLevel'] != null) {
+        reorderLevelInput.text = widget.dataa['reorderLevel'].toString();
+      }
+
+      // Shipping
+      if (widget.dataa['shippingChargeStatus'] == true) {
+        shippingChargeStatus = widget.dataa['shippingChargeStatus'];
+      }
+      if (widget.dataa['shippingCharge'] != null) {
+        shippingChargeInput.text = widget.dataa['shippingCharge'].toString();
+      }
+
+      // Attributes
+      brandInput.text = widget.dataa['brand'];
+      remarksInput.text = widget.dataa['remarks'];
+      if (widget.dataa['sizeList'] != null) {
+        sizeList = widget.dataa['sizeList'] as List;
+      }
     });
     super.initState();
   }
@@ -110,6 +143,32 @@ class _ProductDetailState extends State<ProductDetail> {
         elevation: 0,
         backgroundColor: const Color.fromARGB(255, 10, 11, 102),
         title: Text(widget.dataa['productName']),
+        actions: [
+          editable!
+              ? IconButton(
+                  onPressed: () async {
+                    EasyLoading.show().then((value) {
+                      setState(() {
+                        editable = false;
+                      });
+                    }).then((value) => EasyLoading.showToast(
+                          'You can edit now',
+                          duration: const Duration(seconds: 1),
+                        ));
+                  },
+                  icon: const Icon(Icons.edit),
+                )
+              : IconButton(
+                  onPressed: () {
+                    EasyLoading.show().then((value) {
+                      setState(() {
+                        editable = true;
+                      });
+                    }).then((value) => EasyLoading.dismiss());
+                  },
+                  icon: const Icon(Icons.save),
+                )
+        ],
       ),
       body: ListView(
         children: [
@@ -120,7 +179,7 @@ class _ProductDetailState extends State<ProductDetail> {
               scrollDirection: Axis.horizontal,
               children: widget.images
                   .map((e) => Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
                         child: SizedBox(
                           width: 300,
                           child: CachedNetworkImage(
@@ -132,140 +191,254 @@ class _ProductDetailState extends State<ProductDetail> {
                   .toList(),
             ),
           ),
-          const SizedBox(height: 10),
           AbsorbPointer(
             absorbing: editable!,
             child: Form(
               key: _formkey,
-              child: Column(
-                children: [
-                  // Brand
-                  ProductFields(
-                    textInput: brandInput,
-                    text: 'Brand',
-                  ),
-                  // Product Name
-                  ProductFields(
-                      textInput: productNameInput, text: 'Product Name'),
-                  // Description
-                  ProductFields(
-                      textInput: descriptionInput, text: 'Description'),
-                  // Unit
-                  if (widget.dataa['unit'] != null)
-                    OnlyTextFields(widget: widget, text: 'Unit', field: 'unit'),
-                  Row(
-                    children: [
-                      // Regular Price
-                      Expanded(
-                        child: ProductFields(
-                          textInput: regularPriceInput,
-                          keyboardType: TextInputType.number,
-                          text: 'Regular Price',
-                        ),
-                      ),
-                      // Sales Price
-                      Expanded(
-                        child: ProductFields(
-                          textInput: salesPriceInput,
-                          keyboardType: TextInputType.number,
-                          text: 'Sales Price',
-                        ),
-                      ),
-                    ],
-                  ),
-                  // Tax Status
-                  Padding(
-                    padding: const EdgeInsets.all(18.0),
-                    child: Row(
-                      children: [
-                        Expanded(child: _taxStatusDrop()),
-                        const SizedBox(width: 20),
-                        if (taxStatus == 'Taxable')
-                          Expanded(child: _taxPercentageDrop()),
-                      ],
-                    ),
-                  ),
-                  // Category
-                  OnlyTextFields(
-                    widget: widget,
-                    field: 'category',
-                    text: 'Category',
-                  ),
-                  // Main Category
-                  if (widget.dataa['mainCategory'] != null)
-                    OnlyTextFields(
-                      widget: widget,
-                      field: 'mainCategory',
-                      text: 'Main Category',
-                    ),
-                  // Sub Category
-                  if (widget.dataa['subCategory'] != null)
-                    OnlyTextFields(
-                      widget: widget,
-                      field: 'subCategory',
-                      text: 'Sub Category',
-                    ),
-                  // SKU
-                  if (widget.dataa['sku'] != null)
-                    ProductFields(textInput: skuInput, text: 'SKU'),
-                  if (widget.dataa['manageInventory'] == true)
-                    Row(
-                      children: [
-                        // Stock on Hand
-                        Expanded(
-                          child: ProductFields(
-                            textInput: stockOnHandInput,
-                            text: 'Stock on Hand',
-                            keyboardType: TextInputType.number,
-                          ),
-                        ),
-                        // Reorder Level
-                        Expanded(
-                          child: ProductFields(
-                            textInput: reorderLevelInput,
-                            text: 'Reorder Level',
-                            keyboardType: TextInputType.number,
-                          ),
-                        ),
-                      ],
-                    ),
-                  // Shipping Charge
-                  if (widget.dataa['shippingChargeStatus'] == true)
+              child: Padding(
+                padding: const EdgeInsets.all(18.0),
+                child: Column(
+                  children: [
+                    // Brand
                     ProductFields(
-                      textInput: shippingChargeInput,
-                      text: 'Shipping Charge',
-                      keyboardType: TextInputType.number,
+                      textInput: brandInput,
+                      text: 'Brand',
                     ),
-                ],
+                    // Product Name
+                    ProductFields(
+                        textInput: productNameInput, text: 'Product Name'),
+                    // Description
+                    ProductFields(
+                      textInput: descriptionInput,
+                      text: 'Description',
+                      minLines: 1,
+                      maxLines: 10,
+                    ),
+                    // Remarks
+                    ProductFields(
+                      textInput: remarksInput,
+                      text: 'Remarks',
+                      minLines: 1,
+                      maxLines: 10,
+                    ),
+                    // Unit
+                    if (widget.dataa['unit'] != null)
+                      OnlyTextFields(
+                          widget: widget, text: 'Unit', field: 'unit'),
+                    const Divider(color: Colors.black),
+                    Column(
+                      children: [
+                        Row(
+                          children: [
+                            // Regular Price
+                            Expanded(
+                              child: ProductFields(
+                                textInput: regularPriceInput,
+                                keyboardType: TextInputType.number,
+                                text: 'Regular Price',
+                              ),
+                            ),
+                            const SizedBox(width: 15),
+                            // Sales Price
+                            Expanded(
+                              child: ProductFields(
+                                textInput: salesPriceInput,
+                                keyboardType: TextInputType.number,
+                                text: 'Sales Price',
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (scheduleDate != null)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              // Schedule Date
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  const Text(
+                                    'Sales Price until: ',
+                                  ),
+                                  Text(
+                                    DateFormat.yMd().format(scheduleDate!),
+                                  ),
+                                ],
+                              ),
+                              // Change Date Button
+                              if (!editable!)
+                                ElevatedButton(
+                                  onPressed: () {
+                                    showDatePicker(
+                                      context: context,
+                                      initialDate: DateTime.now(),
+                                      firstDate: DateTime.now(),
+                                      lastDate: DateTime(2999),
+                                    ).then((value) {
+                                      setState(() {
+                                        scheduleDate = value;
+                                      });
+                                    });
+                                  },
+                                  child: const Text('Change Date'),
+                                )
+                            ],
+                          ),
+                      ],
+                    ),
+                    const Divider(color: Colors.black),
+                    // Size List
+                    if (sizeList.isNotEmpty)
+                      Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text('Size List:',
+                                  style: TextStyle(fontSize: 17)),
+                              if (sizeList.isNotEmpty)
+                                SizedBox(
+                                  height: 60,
+                                  child: ListView.builder(
+                                    shrinkWrap: true,
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: sizeList.length,
+                                    itemBuilder: (context, index) {
+                                      return Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Container(
+                                          height: 50,
+                                          width: 50,
+                                          decoration: BoxDecoration(
+                                            color: Colors.orange[200],
+                                            borderRadius:
+                                                BorderRadius.circular(15.0),
+                                          ),
+                                          child: Center(
+                                            child: Text(sizeList[index]),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const Divider(color: Colors.black),
+                        ],
+                      ),
+                    // Tax Status
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      child: Row(
+                        children: [
+                          Expanded(child: _taxStatusDrop()),
+                          const SizedBox(width: 20),
+                          if (taxStatus == 'Taxable')
+                            Expanded(child: _taxPercentageDrop()),
+                        ],
+                      ),
+                    ),
+                    const Divider(color: Colors.black),
+                    // Category
+                    OnlyTextFields(
+                      widget: widget,
+                      field: 'category',
+                      text: 'Category',
+                    ),
+                    // Main Category
+                    if (widget.dataa['mainCategory'] != null)
+                      OnlyTextFields(
+                        widget: widget,
+                        field: 'mainCategory',
+                        text: 'Main Category',
+                      ),
+                    // Sub Category
+                    if (widget.dataa['subCategory'] != null)
+                      OnlyTextFields(
+                        widget: widget,
+                        field: 'subCategory',
+                        text: 'Sub Category',
+                      ),
+                    const Divider(color: Colors.black),
+                    // SKU
+                    if (widget.dataa['sku'] != null)
+                      ProductFields(textInput: skuInput, text: 'SKU'),
+                    const Divider(color: Colors.black),
+                    // Manage Inventory?
+                    Column(
+                      children: [
+                        CheckboxListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text('Manage Inventory?'),
+                          value: manageInventory,
+                          onChanged: (value) {
+                            setState(() {
+                              manageInventory = value;
+                              if (value == false || value == null) {
+                                stockOnHandInput.clear();
+                                reorderLevelInput.clear();
+                              }
+                            });
+                          },
+                        ),
+                        if (manageInventory!)
+                          Row(
+                            children: [
+                              // Stock on Hand
+                              Expanded(
+                                child: ProductFields(
+                                  textInput: stockOnHandInput,
+                                  text: 'Stock on Hand',
+                                  keyboardType: TextInputType.number,
+                                ),
+                              ),
+                              const SizedBox(width: 15),
+                              // Reorder Level
+                              Expanded(
+                                child: ProductFields(
+                                  textInput: reorderLevelInput,
+                                  text: 'Reorder Level',
+                                  keyboardType: TextInputType.number,
+                                ),
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
+                    const Divider(color: Colors.black),
+                    // Adding Shipping Charges?
+                    Column(
+                      children: [
+                        CheckboxListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text('Adding Shipping Charges?'),
+                          value: shippingChargeStatus,
+                          onChanged: (value) {
+                            setState(() {
+                              shippingChargeStatus = value;
+                              if (value == false || value == null) {
+                                shippingChargeInput.clear();
+                              }
+                            });
+                          },
+                        ),
+                        // Shipping Charge
+                        if (shippingChargeStatus!)
+                          ProductFields(
+                            textInput: shippingChargeInput,
+                            text: 'Shipping Charge',
+                            keyboardType: TextInputType.number,
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         ],
       ),
-      floatingActionButton: editable!
-          ? FloatingActionButton(
-              onPressed: () async {
-                EasyLoading.show().then((value) {
-                  setState(() {
-                    editable = false;
-                  });
-                }).then((value) => EasyLoading.showToast(
-                      'You can edit now',
-                      duration: const Duration(seconds: 1),
-                    ));
-              },
-              child: const Icon(Icons.edit),
-            )
-          : FloatingActionButton(
-              onPressed: () {
-                EasyLoading.show().then((value) {
-                  setState(() {
-                    editable = true;
-                  });
-                }).then((value) => EasyLoading.dismiss());
-              },
-              child: const Icon(Icons.save),
-            ),
     );
   }
 }
@@ -285,7 +458,7 @@ class OnlyTextFields extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(18.0),
+      padding: const EdgeInsets.symmetric(vertical: 18),
       child: Row(
         children: [
           Expanded(
@@ -314,16 +487,20 @@ class ProductFields extends StatelessWidget {
     required this.textInput,
     required this.text,
     this.keyboardType,
+    this.minLines,
+    this.maxLines,
   }) : super(key: key);
 
   final TextEditingController textInput;
   final String text;
   final TextInputType? keyboardType;
+  final int? minLines;
+  final int? maxLines;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.symmetric(vertical: 18),
       child: Row(
         children: [
           Expanded(
@@ -336,10 +513,13 @@ class ProductFields extends StatelessWidget {
             child: TextFormField(
               controller: textInput,
               keyboardType: keyboardType,
+              minLines: minLines,
+              maxLines: maxLines,
               validator: (value) {
                 if (value!.isEmpty) {
                   return '$text is required';
                 }
+                return null;
               },
             ),
           ),

@@ -30,6 +30,7 @@ class FormFieldInput extends StatelessWidget {
         if (value!.isEmpty) {
           return '$label is required';
         }
+        return null;
       },
       onChanged: onChanged,
       minLines: minLines,

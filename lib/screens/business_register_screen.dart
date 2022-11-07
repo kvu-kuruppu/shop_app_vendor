@@ -217,6 +217,7 @@ class _BusinessRegisterScreenState extends State<BusinessRegisterScreen> {
                         if (value!.isEmpty) {
                           return 'Business Name is required';
                         }
+                        return null;
                       },
                     ),
                     // Contact No Input
@@ -228,6 +229,7 @@ class _BusinessRegisterScreenState extends State<BusinessRegisterScreen> {
                         if (value!.isEmpty) {
                           return 'Contact No is required';
                         }
+                        return null;
                       },
                     ),
                     // Email Input
@@ -242,6 +244,7 @@ class _BusinessRegisterScreenState extends State<BusinessRegisterScreen> {
                         if (!EmailValidator.validate(value)) {
                           return 'Enter Valid Email';
                         }
+                        return null;
                       },
                     ),
                     const SizedBox(
@@ -279,6 +282,7 @@ class _BusinessRegisterScreenState extends State<BusinessRegisterScreen> {
                                 if (value == null) {
                                   return 'Select Tax Status';
                                 }
+                                return null;
                               },
                             ),
                           ),
@@ -294,6 +298,7 @@ class _BusinessRegisterScreenState extends State<BusinessRegisterScreen> {
                           if (value!.isEmpty) {
                             return 'GST No is required';
                           }
+                          return null;
                         },
                       ),
                     // PIN Code Input
@@ -305,6 +310,7 @@ class _BusinessRegisterScreenState extends State<BusinessRegisterScreen> {
                         if (value!.isEmpty) {
                           return 'PIN Code is required';
                         }
+                        return null;
                       },
                     ),
                     // Landmark Input
@@ -315,6 +321,7 @@ class _BusinessRegisterScreenState extends State<BusinessRegisterScreen> {
                         if (value!.isEmpty) {
                           return 'Landmark is required';
                         }
+                        return null;
                       },
                     ),
                     const SizedBox(

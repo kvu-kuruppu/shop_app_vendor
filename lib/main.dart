@@ -12,6 +12,7 @@ import 'package:shop_app_vendor/screens/landing_screen.dart';
 import 'package:shop_app_vendor/screens/login.dart';
 import 'package:shop_app_vendor/screens/products_screen.dart';
 import 'package:shop_app_vendor/screens/splash_screen.dart';
+import 'package:shop_app_vendor/screens/testing_a.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -59,7 +59,9 @@ class ProductData extends StatelessWidget {
                   ),
                   // Delete
                   SlidableAction(
-                    onPressed: (context) {},
+                    onPressed: (context) {
+                      service.products.doc(id).delete();
+                    },
                     backgroundColor: Colors.red,
                     icon: Icons.delete,
                     label: 'Delete',
