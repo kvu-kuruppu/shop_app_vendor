@@ -357,14 +357,23 @@ class MainCategoryList extends StatelessWidget {
             .get(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const SizedBox(
+              height: 100,
+              width: 100,
+              child: Center(child: CircularProgressIndicator()),
+            );
           }
 
           if (snapshot.data!.size == 0) {
-            return const Center(child: Text('No Main Categories'));
+            return const SizedBox(
+              height: 100,
+              width: 100,
+              child: Center(child: Text('No Main Categories')),
+            );
           }
 
           return ListView.builder(
+            shrinkWrap: true,
             itemCount: snapshot.data!.size,
             itemBuilder: (context, index) {
               return ListTile(
@@ -405,14 +414,23 @@ class SubCategoryList extends StatelessWidget {
             .get(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const SizedBox(
+              height: 100,
+              width: 100,
+              child: Center(child: CircularProgressIndicator()),
+            );
           }
 
           if (snapshot.data!.size == 0) {
-            return const Center(child: Text('No Sub Categories'));
+            return const SizedBox(
+              height: 100,
+              width: 100,
+              child: Center(child: Text('No Main Categories')),
+            );
           }
 
           return ListView.builder(
+            shrinkWrap: true,
             itemCount: snapshot.data!.size,
             itemBuilder: (context, index) {
               return ListTile(

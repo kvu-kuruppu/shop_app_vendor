@@ -22,7 +22,7 @@ class Home extends StatelessWidget {
       ),
       drawer: const CustomDrawer(),
       body: const Center(
-        child: Text('Home'),
+        child: Text('Dashboard'),
       ),
     );
   }

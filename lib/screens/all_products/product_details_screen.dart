@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:intl/intl.dart';
+import 'package:shop_app_vendor/services/firebase_services.dart';
+import 'package:shop_app_vendor/widgets/scaffold_msg.dart';
 
 class ProductDetail extends StatefulWidget {
   final String id;
@@ -20,6 +22,8 @@ class ProductDetail extends StatefulWidget {
 }
 
 class _ProductDetailState extends State<ProductDetail> {
+  final FirebaseService _service = FirebaseService();
+  final SCF scf = SCF();
   final _formkey = GlobalKey<FormState>();
   var productNameInput = TextEditingController();
   var brandInput = TextEditingController();
@@ -31,6 +35,7 @@ class _ProductDetailState extends State<ProductDetail> {
   var reorderLevelInput = TextEditingController();
   var shippingChargeInput = TextEditingController();
   var remarksInput = TextEditingController();
+  var sizeInput = TextEditingController();
   String? taxStatus;
   String? taxPercentage;
   bool? editable = true;
@@ -38,6 +43,7 @@ class _ProductDetailState extends State<ProductDetail> {
   bool? manageInventory = false;
   bool? shippingChargeStatus = false;
   List sizeList = [];
+  bool addList = false;
 
   Widget _taxStatusDrop() {
     return DropdownButtonFormField<String>(
@@ -91,6 +97,44 @@ class _ProductDetailState extends State<ProductDetail> {
     );
   }
 
+  updateProduct() {
+    try {
+      EasyLoading.show().then((value) {
+        _service.products.doc(widget.id).update({
+          'brand': brandInput.text,
+          'productName': productNameInput.text,
+          'description': descriptionInput.text,
+          'remarks': remarksInput.text,
+          'regularPrice': int.parse(regularPriceInput.text),
+          'salesPrice': int.parse(salesPriceInput.text),
+          'sizeList': sizeList,
+          'taxStatus': taxStatus,
+          if (taxStatus == 'Taxable')
+            'taxPercentage': taxPercentage == 'GST-10%' ? 10 : 12,
+          'manageInventory': manageInventory,
+          if (manageInventory!) 'stockOnHand': int.parse(stockOnHandInput.text),
+          if (manageInventory!)
+            'reorderLevel': int.parse(reorderLevelInput.text),
+          'shippingChargeStatus': shippingChargeStatus,
+          if (shippingChargeStatus!)
+            'shippingCharge': int.parse(shippingChargeInput.text),
+        });
+        setState(() {
+          editable = true;
+          addList = false;
+        });
+      }).then((value) {
+        EasyLoading.showSuccess('Done');
+        Navigator.of(context).pop();
+      });
+    } catch (e) {
+      scf.scaffoldMsg(
+        context: context,
+        msg: e.toString(),
+      );
+    }
+  }
+
   @override
   void initState() {
     setState(() {
@@ -107,7 +151,7 @@ class _ProductDetailState extends State<ProductDetail> {
           widget.dataa['taxPercentage'] == 10 ? 'GST-10%' : 'GST-12%';
 
       // Inventory
-      skuInput.text = widget.dataa['sku'] ?? 'SKU';
+      skuInput.text = widget.dataa['sku'];
       if (widget.dataa['manageInventory'] == true) {
         manageInventory = widget.dataa['manageInventory'];
       }
@@ -160,11 +204,9 @@ class _ProductDetailState extends State<ProductDetail> {
                 )
               : IconButton(
                   onPressed: () {
-                    EasyLoading.show().then((value) {
-                      setState(() {
-                        editable = true;
-                      });
-                    }).then((value) => EasyLoading.dismiss());
+                    if (_formkey.currentState!.validate()) {
+                      updateProduct();
+                    }
                   },
                   icon: const Icon(Icons.save),
                 )
@@ -241,10 +283,43 @@ class _ProductDetailState extends State<ProductDetail> {
                             const SizedBox(width: 15),
                             // Sales Price
                             Expanded(
-                              child: ProductFields(
-                                textInput: salesPriceInput,
-                                keyboardType: TextInputType.number,
-                                text: 'Sales Price',
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 18),
+                                child: Row(
+                                  children: [
+                                    const Expanded(
+                                      flex: 2,
+                                      child: Text(
+                                        'Sales Price :',
+                                        style: TextStyle(fontSize: 17),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 5),
+                                    Expanded(
+                                      flex: 3,
+                                      child: TextFormField(
+                                        controller: salesPriceInput,
+                                        keyboardType: TextInputType.number,
+                                        validator: (value) {
+                                          if (value!.isEmpty) {
+                                            return 'Sales Price is required';
+                                          }
+                                          if (int.parse(value) >
+                                              int.parse(
+                                                  regularPriceInput.text)) {
+                                            scf.scaffoldMsg(
+                                              context: context,
+                                              msg:
+                                                  'Sales price should be less than Regular price',
+                                            );
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ],
@@ -288,45 +363,100 @@ class _ProductDetailState extends State<ProductDetail> {
                     ),
                     const Divider(color: Colors.black),
                     // Size List
-                    if (sizeList.isNotEmpty)
-                      Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text('Size List:',
-                                  style: TextStyle(fontSize: 17)),
-                              if (sizeList.isNotEmpty)
-                                SizedBox(
+                    Column(
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              'Size List: ${sizeList.isEmpty ? 'empty' : ''}',
+                              style: const TextStyle(fontSize: 17),
+                            ),
+                            if (sizeList.isNotEmpty)
+                              Expanded(
+                                child: SizedBox(
                                   height: 60,
+                                  width: 100,
                                   child: ListView.builder(
-                                    shrinkWrap: true,
                                     scrollDirection: Axis.horizontal,
                                     itemCount: sizeList.length,
                                     itemBuilder: (context, index) {
                                       return Padding(
                                         padding: const EdgeInsets.all(8.0),
-                                        child: Container(
-                                          height: 50,
-                                          width: 50,
-                                          decoration: BoxDecoration(
-                                            color: Colors.orange[200],
-                                            borderRadius:
-                                                BorderRadius.circular(15.0),
-                                          ),
-                                          child: Center(
-                                            child: Text(sizeList[index]),
+                                        child: InkWell(
+                                          onTap: () {
+                                            setState(() {
+                                              sizeList.removeAt(index);
+                                            });
+                                          },
+                                          child: Container(
+                                            height: 50,
+                                            width: 50,
+                                            decoration: BoxDecoration(
+                                              color: Colors.orange[200],
+                                              borderRadius:
+                                                  BorderRadius.circular(15.0),
+                                            ),
+                                            child: Center(
+                                              child: Text(
+                                                sizeList[index].toUpperCase(),
+                                              ),
+                                            ),
                                           ),
                                         ),
                                       );
                                     },
                                   ),
                                 ),
+                              ),
+                          ],
+                        ),
+                        if (!editable!)
+                          TextButton(
+                            onPressed: () {
+                              setState(() {
+                                addList = true;
+                              });
+                            },
+                            child: const Text('Add List'),
+                          ),
+                        if (addList)
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  controller: sizeInput,
+                                  decoration: InputDecoration(
+                                    filled: true,
+                                    fillColor: Colors.grey[400],
+                                    border: InputBorder.none,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              ElevatedButton(
+                                onPressed: () {
+                                  if (sizeInput.text.isEmpty) {
+                                    scf.scaffoldMsg(
+                                      context: context,
+                                      msg: 'Size is not added',
+                                    );
+                                    return;
+                                  }
+
+                                  sizeList.add(sizeInput.text);
+
+                                  setState(() {
+                                    sizeInput.clear();
+                                  });
+                                },
+                                child: const Text('Add'),
+                              ),
                             ],
                           ),
-                          const Divider(color: Colors.black),
-                        ],
-                      ),
+                        const Divider(color: Colors.black),
+                      ],
+                    ),
                     // Tax Status
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 18),
@@ -362,8 +492,11 @@ class _ProductDetailState extends State<ProductDetail> {
                       ),
                     const Divider(color: Colors.black),
                     // SKU
-                    if (widget.dataa['sku'] != null)
-                      ProductFields(textInput: skuInput, text: 'SKU'),
+                    OnlyTextFields(
+                      widget: widget,
+                      field: 'sku',
+                      text: 'SKU',
+                    ),
                     const Divider(color: Colors.black),
                     // Manage Inventory?
                     Column(
